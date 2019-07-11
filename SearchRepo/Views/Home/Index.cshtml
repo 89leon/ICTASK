@@ -1,0 +1,116 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<body>
+
+    <div id="root">
+
+    </div>
+
+    <script type="text/babel">
+
+        class RepositoryList extends React.Component {
+        state = { repositories : [] }
+
+        _handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+        this.getRepositoryList();
+        }
+        }
+
+        getRepositoryList(e, data) {
+        let searchValue = this.refs.repoSearchInput.value;
+        axios.post(`/Home/RepositoryList` , { query : searchValue })
+        .then(res => {
+        //console.log("res", res.data.data);
+        const repositories = res.data.data;
+        this.setState({ repositories });
+        })
+        }
+        getBookmarks() {
+        axios.post(`/Home/GetBookmarks`)
+        .then(res => {
+        //console.log("res", res.data.data);
+        const repositories = res.data.data;
+        this.setState({ repositories });
+        })
+        }
+
+        getLastResults() {
+        axios.post(`/Home/GetLastResults`)
+        .then(res => {
+        //console.log("res", res.data.data);
+        const repositories = res.data.data;
+        this.setState({ repositories });
+        })
+        }
+
+        render() {
+        const imageClick = (repository,index) => {
+        //console.log('Click',repository , index);
+        axios.post(`/Home/BookmarkRepository`, { item : repository })
+        .then(res => {
+
+        });
+
+        }
+        return (
+        <div>
+            <div class="tab">
+                <button type="button" class="tablinks btn btn-info" onClick={this.getLastResults.bind(this)}>Last result</button>
+                <button class="tablinks btn btn-warning" onClick={this.getBookmarks.bind(this)}>Bookmarks</button>
+            </div>
+            <div class="input-group mx-auto">
+
+                <span class="input-group-btn">
+                    <input ref="repoSearchInput" className="form-control m-3" type="text" onKeyDown={this._handleKeyDown} placeholder="Enter repository name to find" />
+                    <button type="button" className="btn btn-default" onClick={this.getRepositoryList.bind(this)}>Search</button>
+                </span>
+            </div>
+
+
+
+            <div>
+
+                {this.state.repositories.map((repository,index) =>
+                <div className="col-md-3 mt-3">
+                    <div className="thumbnail img-thumbnail text-center">
+                        {repository.name}
+                        <figure>
+                            <img src={repository.Owner.Avatar_url} style={{width: '100%' }} />
+                            <figcaption>{repository.Name}</figcaption>
+                            <button type="button" class="btn btn-success" onClick={() => imageClick(repository,index) } >bookmark</button>
+                        </figure>
+                        <div className="caption">
+                            <h4 className="text-center"></h4>
+                        </div>
+                    </div>
+                </div>
+                )}
+
+            </div>
+        </div>
+
+
+        )
+        }
+        }
+
+
+        function Welcome() {
+        return
+        <h1>Hello React!</h1>;
+        }
+
+        ReactDOM.render(
+        <RepositoryList />, document.getElementById('root'));
+    </script>
+
+</body>
+
